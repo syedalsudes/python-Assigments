@@ -1,63 +1,37 @@
 import streamlit as st
-import re
 
-# Function to evaluate password strength
-def password_strength(password):
+# Function to check password strength
+def check_strength(password):
     score = 0
     if len(password) >= 8:
         score += 1
-    if re.search(r"[A-Z]", password) and re.search(r"[a-z]", password):
+    if any(char.isupper() for char in password) and any(char.islower() for char in password):
         score += 1
-    if re.search(r"\d", password):
+    if any(char.isdigit() for char in password):
         score += 1
-    if re.search(r"[!@#$%^&*]", password):
+    if any(char in "!@#$%^&*" for char in password):
         score += 1
-    if score == 4:
-        score += 1
+
     return score
 
-# Function to generate feedback
-def feedback(password, score):
-    feedback_messages = []
-    if score <= 2:
-        feedback_messages.append("Password Strength: Weak")
-        if len(password) < 8:
-            feedback_messages.append("- Increase the length to at least 8 characters.")
-        if not re.search(r"[A-Z]", password) or not re.search(r"[a-z]", password):
-            feedback_messages.append("- Add both uppercase and lowercase letters.")
-        if not re.search(r"\d", password):
-            feedback_messages.append("- Include at least one digit (0-9).")
-        if not re.search(r"[!@#$%^&*]", password):
-            feedback_messages.append("- Include at least one special character (!@#$%^&*).")
-    elif score == 3 or score == 4:
-        feedback_messages.append("Password Strength: Moderate")
-        if len(password) < 8:
-            feedback_messages.append("- Increase the length to at least 8 characters.")
-        if not re.search(r"[A-Z]", password) or not re.search(r"[a-z]", password):
-            feedback_messages.append("- Add both uppercase and lowercase letters.")
-        if not re.search(r"\d", password):
-            feedback_messages.append("- Include at least one digit (0-9).")
-        if not re.search(r"[!@#$%^&*]", password):
-            feedback_messages.append("- Include at least one special character (!@#$%^&*).")
-    else:
-        feedback_messages.append("Password Strength: Strong")
-        feedback_messages.append("Great job! Your password meets all security criteria.")
-    return feedback_messages
-
-# Streamlit App
+# Main function for the app
 def main():
-    st.title("🔐 Password Strength Meter")
-    st.write("Analyze the strength of your password and get feedback to improve it.")
+    st.title("Password Strength Checker")
+    st.write("Enter your password to check its strength.")
     
-    password = st.text_input("Enter your password:", type="password")
+    password = st.text_input("Password:", type="password")
     
     if password:
-        score = password_strength(password)
-        feedback_messages = feedback(password, score)
+        score = check_strength(password)
         
-        st.subheader("Password Analysis")
-        for message in feedback_messages:
-            st.write(message)
+        if score == 4:
+            st.success("Strong Password! 👍")
+        elif score == 3:
+            st.warning("Moderate Password. Can be improved. ⚠️")
+        else:
+            st.error("Weak Password. Try adding more variety! ❌")
+        
+        st.write(f"Score: {score}/4")
 
 if __name__ == "__main__":
     main()
